@@ -3,75 +3,99 @@ from requests_html import HTMLSession
 import re
 
 amazon = HTMLSession().get("https://www.amazon.in/s?k=pocox3")
-# # flipkart = HTMLSession().get("http://results.uoc.ac.in/")
+flipkart = HTMLSession().get("https://www.flipkart.com/search?q=pocox3")
 # # alibaba = HTMLSession().get("http://results.uoc.ac.in/")
 # # snapdeal = HTMLSession().get("http://results.uoc.ac.in/")
 # # indiamart = HTMLSession().get("http://results.uoc.ac.in/")
 
 amazon.html.render(sleep=1, keep_page=True, scrolldown=1)
-# # flipkart.html.render(sleep=1, keep_page=True, scrolldown=1)
+flipkart.html.render(sleep=1, keep_page=True, scrolldown=1)
 # # alibaba.html.render(sleep=1, keep_page=True, scrolldown=1)
 # # snapdeal.html.render(sleep=1, keep_page=True, scrolldown=1)
 # # indiamart.html.render(sleep=1, keep_page=True, scrolldown=1)
 
 amazon_data = amazon.html.find(".s-card-container")
-# # flipkart_data = flipkart.html.find("")
+flipkart_data = flipkart.html.find("._2kHMtA")
 # # alibaba_data = alibaba.html.find("")
 # # snapdeal_data = snapdeal.html.find("")
 # # indiamart_data = indiamart.html.find("")
 
-# az_list = []
+total_list = []
 
-# for item in amazon_data:
-#     az_list.append(item.text)
+def amazon_function():
 
-# print(az_list)
+    # Filtering the Products
+    amazon_product_filter = []
+    for items in amazon_data:
+        amazon_heading = items.find(".a-size-medium", first=True).text.lower()
+        if "poco x3" in amazon_heading:
+            amazon_product_filter.append(items)
+    
+    # Finding the least price from the filtered list 
+    amazon_price_list = []
+    for items in amazon_product_filter:
+        try:
+            amazon_price = items.find(".a-price-whole", first=True).text
+            amazon_price_list.append(amazon_price.replace(",", ""))
+        except:
+            continue
+    
+    amazon_price_list.sort()
+    amazon_least_price = amazon_price_list[0]
+    # print(amazon_least_price)
 
-# inp = input("Enter a product name: ")
+    for items in amazon_product_filter:
+        try:
+            price_check = items.find(".a-price-whole", first=True).text.replace(",", "")
+            if price_check == amazon_least_price:
+                # print(f"Product in amazon: {items.text}")
+                amazon_product = items
+                break
+        except:
+            continue
+    from_amazon = {
+        "heading": amazon_product.find(".a-size-medium", first=True).text,
+        "rating": amazon_product.find(".a-size-base", first=True).text,
+        "price": amazon_product.find(".a-price-whole", first=True).text,
+        # "image": amazon_product.find(".")
+    }
+    total_list.append(from_amazon)
 
-def checking(word):
-    inp = "poco x3"
-    final = re.findall(r"[\w']+", word[2].text)
-    lowerd = ""
+def flipkart_function():
+    flipkart_product_filter = []
+    for items in flipkart_data:
+        flipkart_heading = items.find("._4rR01T", first=True).text.lower()
+        if "poco x3" in flipkart_heading:
+            flipkart_product_filter.append(items)
+    
+    flipkart_price_list = []
+    for items in flipkart_product_filter:
+        flipkart_price = items.find("._30jeq3", first=True).text
+        flipkart_price_list.append(flipkart_price.replace(",", ""))
+    
+    flipkart_price_list.sort()
+    # print(f"The least amount in Flipkart: {flipkart_price_list[0]}")
+    flipkart_least_price = flipkart_price_list[0]
 
-    for i in final:
-        lowerd += f"{i.lower()} "
-
-    if inp in lowerd:
-        p="true"
-    else:
-        p="false"
-
-    if p == "true":
-        print("ture")
-    else:
-        print("false")
-
-# checking(amazon_data)
-
-
-# checking the lest amount
-
-
-def element_with_least_amount():
-
-    LS_data = amazon.html.find(".a-price-whole")
-
-    LS_list = []
-    for items in LS_data:
-        LS_list.append(items.text)
-
-    LS_list.sort()
-    LS_amount = LS_list[0]
-
-    print(f"The least amount: {LS_amount}")
-
-    for i in amazon_data:
-        lol = i.find(".a-price-whole")
-        for y in lol:
-            if y.text == LS_amount:
-                print(f"The least amount element: {i.text}")
+    for items in flipkart_product_filter:
+        try:
+            Fprice_check = items.find("._30jeq3", first=True).text.replace(",", "")
+            if Fprice_check == flipkart_least_price:
+                # print(f"Product in flipkart: {items.text}")
+                flipkart_final_product = items
+                break
+        except:
+            continue
+    
+    from_flipkart = {
+        "heading": flipkart_final_product.find("._4rR01T", first=True).text,
+    }
+    total_list.append(from_flipkart)
+    
 
 
-element_with_least_amount()
 
+
+amazon_function()
+flipkart_function()
+print(total_list)
